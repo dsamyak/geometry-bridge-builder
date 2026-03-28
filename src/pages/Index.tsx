@@ -9,6 +9,7 @@ import { ResultOverlay } from "@/components/game/ResultOverlay";
 import { LevelSelector } from "@/components/game/LevelSelector";
 import { FormulaBreakdown } from "@/components/game/FormulaBreakdown";
 import { StructuralPanel } from "@/components/game/StructuralPanel";
+import { CalculationPad } from "@/components/game/CalculationPad";
 import { Ruler, Triangle, Eye, EyeOff, Zap, ZapOff } from "lucide-react";
 
 type SimState = "idle" | "running" | "success" | "fail";
@@ -23,6 +24,7 @@ export default function Index() {
   const [vehicleY, setVehicleY] = useState(level.groundHeight - 25);
   const [showAnnotations, setShowAnnotations] = useState(true);
   const [showForces, setShowForces] = useState(true);
+  const [activeTool, setActiveTool] = useState<"shape" | "ruler">("shape");
   const [hoveredShapeId, setHoveredShapeId] = useState<string | null>(null);
   const animRef = useRef<number>();
 
@@ -155,6 +157,15 @@ export default function Index() {
           {/* Toggle buttons */}
           <div className="flex gap-2">
             <button
+              onClick={() => setActiveTool(activeTool === "shape" ? "ruler" : "shape")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] uppercase tracking-wider border transition-colors ${
+                activeTool === "ruler" ? "bg-primary/20 border-primary text-primary" : "border-border text-muted-foreground"
+              }`}
+            >
+              <Ruler className="w-3 h-3" />
+              Ruler
+            </button>
+            <button
               onClick={() => setShowAnnotations(!showAnnotations)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] uppercase tracking-wider border transition-colors ${
                 showAnnotations ? "bg-primary/20 border-primary text-primary" : "border-border text-muted-foreground"
@@ -208,14 +219,16 @@ export default function Index() {
               analysis={analysis}
               hoveredShapeId={hoveredShapeId}
               onHoverShape={setHoveredShapeId}
+              activeTool={activeTool}
             />
             <ResultOverlay state={simState} />
           </motion.div>
 
           {/* Bottom panels: formula + structural */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             <FormulaBreakdown shape={hoveredShape} />
             {analysis && <StructuralPanel analysis={analysis} />}
+            <CalculationPad />
           </div>
         </div>
 

@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState } from "react";
+import React, { useRef, useCallback, useState } from "react";
 import { PlacedShape, ShapeType, calculateArea, calculatePerimeter, calculateSupportStrength, generateId, StructuralAnalysis } from "@/types/game";
 import type { Level } from "@/types/game";
 
@@ -17,6 +17,7 @@ interface GameCanvasProps {
   analysis: StructuralAnalysis | null;
   hoveredShapeId: string | null;
   onHoverShape: (id: string | null) => void;
+  activeTool: "shape" | "ruler";
 }
 
 function ShapeAnnotations({ shape, isHovered }: { shape: PlacedShape; isHovered: boolean }) {
@@ -201,52 +202,82 @@ export function GameCanvas({
   analysis,
   hoveredShapeId,
   onHoverShape,
+  activeTool,
 }: GameCanvasProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const canvasWidth = 800;
   const canvasHeight = 500;
+  const [rulerStart, setRulerStart] = useState<{x: number, y: number} | null>(null);
+  const [rulerEnd, setRulerEnd] = useState<{x: number, y: number} | null>(null);
 
-  const handleClick = useCallback(
-    (e: React.MouseEvent<SVGSVGElement>) => {
-      if (!selectedShape || simulationState !== "idle") return;
-      const svg = svgRef.current;
-      if (!svg) return;
-      const rect = svg.getBoundingClientRect();
-      const scaleX = canvasWidth / rect.width;
-      const scaleY = canvasHeight / rect.height;
-      const x = (e.clientX - rect.left) * scaleX - shapeSize.width / 2;
-      const y = (e.clientY - rect.top) * scaleY - shapeSize.height / 2;
+  const getCanvasCoords = (e: React.PointerEvent) => {
+    const svg = svgRef.current;
+    if (!svg) return null;
+    const rect = svg.getBoundingClientRect();
+    const scaleX = canvasWidth / rect.width;
+    const scaleY = canvasHeight / rect.height;
+    return {
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top) * scaleY
+    };
+  };
 
-      if (y > level.groundHeight - 180 && y < level.groundHeight + 10) {
-        const w = shapeSize.width;
-        const h = selectedShape === "circle" ? shapeSize.width : shapeSize.height;
-        const area = calculateArea(selectedShape, w, h);
-        const perimeter = calculatePerimeter(selectedShape, w, h);
-        const supportStrength = calculateSupportStrength(selectedShape, w, h);
+  const handlePointerDown = (e: React.PointerEvent<SVGSVGElement>) => {
+    if (simulationState !== "idle") return;
+    const coords = getCanvasCoords(e);
+    if (!coords) return;
 
-        // Check if grounded (touching ground or another shape)
-        const touchesGround = (y + h) >= level.groundHeight - 5;
-        const touchesShape = shapes.some((s) => {
-          const sBottom = s.y + s.height;
-          return Math.abs(y - sBottom) < 10 && x + w > s.x && x < s.x + s.width;
-        });
+    if (activeTool === "ruler") {
+      setRulerStart(coords);
+      setRulerEnd(coords);
+      return;
+    }
 
-        onAddShape({
-          id: generateId(),
-          type: selectedShape,
-          x, y,
-          width: w,
-          height: h,
-          rotation: 0,
-          area,
-          perimeter,
-          supportStrength,
-          grounded: touchesGround || touchesShape,
-        });
-      }
-    },
-    [selectedShape, shapeSize, level, onAddShape, simulationState, shapes]
-  );
+    if (!selectedShape) return;
+    const x = coords.x - shapeSize.width / 2;
+    const y = coords.y - shapeSize.height / 2;
+
+    if (y > level.groundHeight - 180 && y < level.groundHeight + 10) {
+      const w = shapeSize.width;
+      const h = selectedShape === "circle" ? shapeSize.width : shapeSize.height;
+      const area = calculateArea(selectedShape, w, h);
+      const perimeter = calculatePerimeter(selectedShape, w, h);
+      const supportStrength = calculateSupportStrength(selectedShape, w, h);
+
+      const touchesGround = (y + h) >= level.groundHeight - 5;
+      const touchesShape = shapes.some((s) => {
+        const sBottom = s.y + s.height;
+        return Math.abs(y - sBottom) < 10 && x + w > s.x && x < s.x + s.width;
+      });
+
+      onAddShape({
+        id: generateId(),
+        type: selectedShape,
+        x, y,
+        width: w,
+        height: h,
+        rotation: 0,
+        area,
+        perimeter,
+        supportStrength,
+        grounded: touchesGround || touchesShape,
+      });
+    }
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<SVGSVGElement>) => {
+    if (activeTool === "ruler" && rulerStart) {
+      const coords = getCanvasCoords(e);
+      if (coords) setRulerEnd(coords);
+    }
+  };
+
+  const handlePointerUp = () => {
+    if (activeTool === "ruler") {
+      setRulerStart(null);
+      setRulerEnd(null);
+    }
+  };
 
   const handleShapeClick = (e: React.MouseEvent, id: string) => {
     if (simulationState !== "idle") return;
@@ -276,8 +307,10 @@ export function GameCanvas({
         ref={svgRef}
         viewBox={`0 0 ${canvasWidth} ${canvasHeight}`}
         className="w-full h-auto blueprint-grid bg-background"
-        onClick={handleClick}
-        style={{ cursor: selectedShape && simulationState === "idle" ? "crosshair" : "default" }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        style={{ cursor: activeTool === "ruler" ? "crosshair" : (selectedShape && simulationState === "idle" ? "crosshair" : "default") }}
       >
         <defs>
           <marker id="arrowDown" markerWidth="6" markerHeight="6" refX="3" refY="6" orient="auto">
@@ -358,6 +391,38 @@ export function GameCanvas({
             <text x={(level.gapStart + level.gapEnd) / 2} y={level.groundHeight - 42} textAnchor="middle"
               fill="hsl(210, 20%, 45%)" fontSize={10} fontFamily="JetBrains Mono" opacity={0.5}>
               Each shape costs area in material budget
+            </text>
+          </g>
+        )}
+
+        {/* Ruler Line */}
+        {activeTool === "ruler" && rulerStart && rulerEnd && (
+          <g>
+            <line 
+              x1={rulerStart.x} y1={rulerStart.y} 
+              x2={rulerEnd.x} y2={rulerEnd.y} 
+              stroke="hsl(192, 100%, 60%)" 
+              strokeWidth={2} 
+              strokeDasharray="4 4" 
+            />
+            <circle cx={rulerStart.x} cy={rulerStart.y} r={4} fill="hsl(192, 100%, 60%)" />
+            <circle cx={rulerEnd.x} cy={rulerEnd.y} r={4} fill="hsl(192, 100%, 60%)" />
+            
+            <rect 
+              x={(rulerStart.x + rulerEnd.x) / 2 - 30} 
+              y={(rulerStart.y + rulerEnd.y) / 2 - 20} 
+              width={60} height={16} rx={4} 
+              fill="hsl(210, 30%, 15%)" 
+            />
+            <text 
+              x={(rulerStart.x + rulerEnd.x) / 2} 
+              y={(rulerStart.y + rulerEnd.y) / 2 - 9} 
+              textAnchor="middle" 
+              fill="hsl(192, 100%, 60%)" 
+              fontSize={10} 
+              fontFamily="JetBrains Mono"
+            >
+              {Math.hypot(rulerEnd.x - rulerStart.x, rulerEnd.y - rulerStart.y).toFixed(1)} px
             </text>
           </g>
         )}

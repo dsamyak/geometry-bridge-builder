@@ -42,6 +42,16 @@ export const LEVELS: Level[] = [
     groundHeight: 340, vehicleWeight: 700,
     description: "Tight budget! Optimize area usage — triangles cost half of rectangles."
   },
+  {
+    id: 4, name: "Deep Chasm", gapStart: 180, gapEnd: 620, budget: 35000,
+    groundHeight: 340, vehicleWeight: 800,
+    description: "A massive 440px gap. Use the ruler to measure distances and plan multi-shape structures."
+  },
+  {
+    id: 5, name: "Heavy Load", gapStart: 280, gapEnd: 520, budget: 16000,
+    groundHeight: 340, vehicleWeight: 1200,
+    description: "A short gap but a very heavy vehicle. Maximum structural strength is required."
+  },
 ];
 
 export function calculateArea(type: ShapeType, width: number, height: number): number {

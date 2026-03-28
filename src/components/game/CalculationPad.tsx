@@ -27,9 +27,9 @@ export function CalculationPad() {
   };
 
   return (
-    <div className="bg-card border border-border rounded-lg p-4">
+    <div className="bg-card border border-border rounded-lg p-4 shadow-sm">
       <h3 className="font-display text-sm uppercase tracking-widest text-muted-foreground mb-3 flex items-center gap-2">
-        <Calculator className="w-4 h-4" /> Scratchpad
+        ✨ Magic Math Pad
       </h3>
       
       <div className="space-y-3">
@@ -60,7 +60,7 @@ export function CalculationPad() {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-2 mt-3">
+        <div className="grid grid-cols-3 gap-2 mt-3">
           <div className="bg-muted/40 rounded p-2 text-center border border-transparent hover:border-border transition-colors">
             <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Result (Rect)</div>
             <div className="text-sm font-bold text-shape-rect font-mono">
@@ -71,6 +71,12 @@ export function CalculationPad() {
             <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">½ × w × h (Tri)</div>
             <div className="text-sm font-bold text-shape-triangle font-mono">
               {triangleResult()}
+            </div>
+          </div>
+          <div className="bg-muted/40 rounded p-2 text-center border border-transparent hover:border-border transition-colors">
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">¾ × w × h (Trap)</div>
+            <div className="text-sm font-bold text-[hsl(35,90%,55%)] font-mono">
+              {isNaN(parseFloat(expr1)) || isNaN(parseFloat(expr2)) ? "--" : (0.75 * parseFloat(expr1) * parseFloat(expr2)).toLocaleString(undefined, { maximumFractionDigits: 1 })}
             </div>
           </div>
         </div>

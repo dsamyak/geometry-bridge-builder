@@ -1,4 +1,4 @@
-export type ShapeType = 'circle' | 'rectangle' | 'triangle';
+export type ShapeType = 'circle' | 'rectangle' | 'triangle' | 'trapezoid';
 
 export interface PlacedShape {
   id: string;
@@ -28,30 +28,40 @@ export interface Level {
 
 export const LEVELS: Level[] = [
   {
-    id: 1, name: "Simple Crossing", gapStart: 300, gapEnd: 500, budget: 18000,
+    id: 1, name: "Easy Peasy Crossing", gapStart: 300, gapEnd: 500, budget: 18000,
     groundHeight: 340, vehicleWeight: 500,
-    description: "Bridge a 200px gap. Learn how area determines material cost."
+    description: "Welcome student! Your first task is a small gap of 200px. Remember, the area of your shapes determines the material cost!"
   },
   {
-    id: 2, name: "Wide Canyon", gapStart: 220, gapEnd: 580, budget: 25000,
+    id: 2, name: "The Croc-Filled Canyon", gapStart: 220, gapEnd: 580, budget: 25000,
     groundHeight: 340, vehicleWeight: 600,
-    description: "A wider gap needs more support. Use triangles for structural strength!"
+    description: "Watch out for the imaginary crocodiles! A wider gap needs a stronger bridge. Can triangles provide the structural strength you need?"
   },
   {
-    id: 3, name: "Engineer's Challenge", gapStart: 250, gapEnd: 550, budget: 14000,
+    id: 3, name: "Teacher's Tight Budget", gapStart: 250, gapEnd: 550, budget: 14000,
     groundHeight: 340, vehicleWeight: 700,
-    description: "Tight budget! Optimize area usage — triangles cost half of rectangles."
+    description: "Oops! We spent all our geometry budget on pizza. You must optimize your area usage—triangles cost half the area of a rectangle!"
   },
   {
-    id: 4, name: "Deep Chasm", gapStart: 180, gapEnd: 620, budget: 35000,
+    id: 4, name: "The Giant's Chasm", gapStart: 180, gapEnd: 620, budget: 35000,
     groundHeight: 340, vehicleWeight: 800,
-    description: "A massive 440px gap. Use the ruler to measure distances and plan multi-shape structures."
+    description: "A gigantic 440px gap! Use your trusty ruler tool to measure out the distances before you start building your masterpiece."
   },
   {
-    id: 5, name: "Heavy Load", gapStart: 280, gapEnd: 520, budget: 16000,
-    groundHeight: 340, vehicleWeight: 1200,
-    description: "A short gap but a very heavy vehicle. Maximum structural strength is required."
+    id: 5, name: "The Hippo Transport", gapStart: 280, gapEnd: 520, budget: 16000,
+    groundHeight: 340, vehicleWeight: 1400,
+    description: "Uh oh! We need to transport a very heavy hippo across this gap safely! Maximum structural strength is absolutely required!"
   },
+  {
+    id: 6, name: "Trapezoid Trial!", gapStart: 200, gapEnd: 600, budget: 22000,
+    groundHeight: 340, vehicleWeight: 900,
+    description: "New shape unlocked! Try using Trapezoids! They offer better structural strength than rectangles while covering more area than triangles."
+  },
+  {
+    id: 7, name: "Playful Sandbox", gapStart: 100, gapEnd: 700, budget: 99999,
+    groundHeight: 340, vehicleWeight: 800,
+    description: "Go wild! You have a huge 600px gap and endless budget. Build the craziest and most colorful bridge you can imagine and let the car ride!"
+  }
 ];
 
 export function calculateArea(type: ShapeType, width: number, height: number): number {
@@ -62,6 +72,9 @@ export function calculateArea(type: ShapeType, width: number, height: number): n
       return width * height;
     case 'triangle':
       return (width * height) / 2;
+    case 'trapezoid':
+      // Isosceles trapezoid with top base = 0.5 * bottom base (width)
+      return (0.75 * width * height);
   }
 }
 
@@ -76,6 +89,11 @@ export function calculatePerimeter(type: ShapeType, width: number, height: numbe
       const side = Math.sqrt(halfBase * halfBase + height * height);
       return width + 2 * side;
     }
+    case 'trapezoid': {
+      // Top base is width/2, bottom is width.
+      const side = Math.sqrt(height * height + Math.pow(width * 0.25, 2));
+      return 1.5 * width + 2 * side;
+    }
   }
 }
 
@@ -89,6 +107,8 @@ export function calculateSupportStrength(type: ShapeType, width: number, height:
       return area * 2.5; // Triangles are inherently rigid
     case 'rectangle':
       return area * 1.2;
+    case 'trapezoid':
+      return area * 1.8; // Better than rectangle
     case 'circle':
       return area * 0.8;
   }
@@ -120,6 +140,14 @@ export function getFormulaSteps(type: ShapeType, width: number, height: number):
         explanation: `Base = ${width}, Height = ${height}`,
       };
     }
+    case 'trapezoid': {
+      return {
+        formula: 'A = ½(a + b)h',
+        substitution: `A = ½(${Math.round(width/2)} + ${width}) × ${height}`,
+        result: `A = ${(0.75 * width * height).toFixed(1)} sq units`,
+        explanation: `Top = ${Math.round(width/2)}, Bottom = ${width}, Height = ${height}`,
+      };
+    }
   }
 }
 
@@ -146,6 +174,14 @@ export function getPerimeterSteps(type: ShapeType, width: number, height: number
         formula: 'P = b + 2s',
         substitution: `P = ${width} + 2 × ${side.toFixed(1)}`,
         result: `P = ${(width + 2 * side).toFixed(1)} units`,
+      };
+    }
+    case 'trapezoid': {
+      const side = Math.sqrt(height * height + Math.pow(width * 0.25, 2));
+      return {
+        formula: 'P = a + b + 2s',
+        substitution: `P = ${Math.round(width/2)} + ${width} + 2 × ${side.toFixed(1)}`,
+        result: `P = ${(1.5 * width + 2 * side).toFixed(1)} units`,
       };
     }
   }

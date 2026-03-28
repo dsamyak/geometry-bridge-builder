@@ -53,6 +53,10 @@ export default function Index() {
     setShapes((prev) => [...prev, shape]);
   }, []);
 
+  const updateShape = useCallback((id: string, partial: Partial<PlacedShape>) => {
+    setShapes((prev) => prev.map((s) => s.id === id ? { ...s, ...partial } : s));
+  }, []);
+
   const removeShape = useCallback((id: string) => {
     setShapes((prev) => prev.filter((s) => s.id !== id));
     if (hoveredShapeId === id) setHoveredShapeId(null);
@@ -146,10 +150,10 @@ export default function Index() {
             </div>
             <div>
               <h1 className="font-display text-xl font-bold text-foreground glow-text">
-                Geometry Architect
+                🎓 Student Architect
               </h1>
               <p className="text-[10px] text-muted-foreground flex items-center gap-1">
-                <Ruler className="w-3 h-3" /> Learn geometry through structural engineering
+                <Ruler className="w-3 h-3" /> Play, build, and learn geometry!
               </p>
             </div>
           </div>
@@ -208,6 +212,7 @@ export default function Index() {
               level={level}
               shapes={shapes}
               onAddShape={addShape}
+              onUpdateShape={updateShape}
               onRemoveShape={removeShape}
               selectedShape={selectedShape}
               shapeSize={shapeSize}
@@ -284,11 +289,11 @@ export default function Index() {
 
           {/* Shape count */}
           <div className="bg-card border border-border rounded-lg p-3 text-center">
-            <span className="text-xs text-muted-foreground">Placed: </span>
+            <span className="text-xs text-muted-foreground">Shapes Placed: </span>
             <span className="text-sm font-bold text-foreground">{shapes.length}</span>
             {shapes.length > 0 && (
-              <span className="text-xs text-muted-foreground ml-1">
-                ({shapes.filter((s) => s.type === "triangle").length}△ {shapes.filter((s) => s.type === "rectangle").length}▬ {shapes.filter((s) => s.type === "circle").length}●)
+              <span className="text-xs text-muted-foreground ml-1 block mt-1">
+                {shapes.filter((s) => s.type === "triangle").length}△ {shapes.filter((s) => s.type === "rectangle").length}▬ {shapes.filter((s) => s.type === "trapezoid").length}⏢ {shapes.filter((s) => s.type === "circle").length}●
               </span>
             )}
           </div>

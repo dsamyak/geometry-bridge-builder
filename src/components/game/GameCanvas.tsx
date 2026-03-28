@@ -18,6 +18,7 @@ interface GameCanvasProps {
   hoveredShapeId: string | null;
   onHoverShape: (id: string | null) => void;
   activeTool: "shape" | "ruler";
+  onUpdateShape: (id: string, partial: Partial<PlacedShape>) => void;
 }
 
 function ShapeAnnotations({ shape, isHovered }: { shape: PlacedShape; isHovered: boolean }) {
@@ -127,6 +128,44 @@ function ShapeAnnotations({ shape, isHovered }: { shape: PlacedShape; isHovered:
     );
   }
 
+  if (shape.type === "trapezoid") {
+    const topW = shape.width / 2;
+    const topX1 = shape.x + shape.width / 4;
+    const topX2 = shape.x + shape.width * 0.75;
+    const botY = shape.y + shape.height;
+    return (
+      <g>
+        {/* Top dimension */}
+        <line x1={topX1} y1={shape.y - 6} x2={topX2} y2={shape.y - 6} stroke={dimColor} strokeWidth={0.8} />
+        <line x1={topX1} y1={shape.y - 10} x2={topX1} y2={shape.y - 2} stroke={dimColor} strokeWidth={0.6} />
+        <line x1={topX2} y1={shape.y - 10} x2={topX2} y2={shape.y - 2} stroke={dimColor} strokeWidth={0.6} />
+        <text x={(topX1 + topX2) / 2} y={shape.y - 9} textAnchor="middle" fill={dimColor} fontSize={fontSize} fontFamily="JetBrains Mono">
+          a={topW}
+        </text>
+        {/* Bottom dimension */}
+        <line x1={shape.x} y1={botY + 6} x2={shape.x + shape.width} y2={botY + 6} stroke={dimColor} strokeWidth={0.8} />
+        <line x1={shape.x} y1={botY + 2} x2={shape.x} y2={botY + 10} stroke={dimColor} strokeWidth={0.6} />
+        <line x1={shape.x + shape.width} y1={botY + 2} x2={shape.x + shape.width} y2={botY + 10} stroke={dimColor} strokeWidth={0.6} />
+        <text x={shape.x + shape.width / 2} y={botY + 14} textAnchor="middle" fill={dimColor} fontSize={fontSize} fontFamily="JetBrains Mono">
+          b={shape.width}
+        </text>
+        {/* Height dimension */}
+        <line x1={topX2 + 8} y1={shape.y} x2={topX2 + 8} y2={botY} stroke={dimColor} strokeWidth={0.8} />
+        <line x1={topX2 + 4} y1={shape.y} x2={topX2 + 12} y2={shape.y} stroke={dimColor} strokeWidth={0.6} />
+        <line x1={topX2 + 4} y1={botY} x2={topX2 + 12} y2={botY} stroke={dimColor} strokeWidth={0.6} />
+        <text x={topX2 + 14} y={(shape.y + botY) / 2 + 3} textAnchor="start" fill={dimColor} fontSize={fontSize} fontFamily="JetBrains Mono">
+          h={shape.height}
+        </text>
+        {/* Area label */}
+        {isHovered && (
+          <text x={shape.x + shape.width / 2} y={(shape.y + botY) / 2 + 3} textAnchor="middle" fill={labelColor} fontSize={fontSize + 1} fontFamily="JetBrains Mono" fontWeight="bold">
+            A = {shape.area.toFixed(0)}
+          </text>
+        )}
+      </g>
+    );
+  }
+
   return null;
 }
 
@@ -203,12 +242,17 @@ export function GameCanvas({
   hoveredShapeId,
   onHoverShape,
   activeTool,
+  onUpdateShape,
 }: GameCanvasProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const canvasWidth = 800;
   const canvasHeight = 500;
   const [rulerStart, setRulerStart] = useState<{x: number, y: number} | null>(null);
   const [rulerEnd, setRulerEnd] = useState<{x: number, y: number} | null>(null);
+  
+  // Dragging state
+  const [draggingShapeId, setDraggingShapeId] = useState<string | null>(null);
+  const [dragOffset, setDragOffset] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
 
   const getCanvasCoords = (e: React.PointerEvent) => {
     const svg = svgRef.current;
@@ -231,6 +275,18 @@ export function GameCanvas({
       setRulerStart(coords);
       setRulerEnd(coords);
       return;
+    }
+
+    // Check if we clicked on an existing shape (for dragging)
+    // We traverse in reverse to pick the topmost shape
+    for (let i = shapes.length - 1; i >= 0; i--) {
+      const s = shapes[i];
+      if (coords.x >= s.x && coords.x <= s.x + s.width && coords.y >= s.y && coords.y <= s.y + s.height) {
+        setDraggingShapeId(s.id);
+        setDragOffset({ x: coords.x - s.x, y: coords.y - s.y });
+        onHoverShape(s.id); // Also set hover so it highlights
+        return; // Don't place a new shape
+      }
     }
 
     if (!selectedShape) return;
@@ -269,6 +325,21 @@ export function GameCanvas({
     if (activeTool === "ruler" && rulerStart) {
       const coords = getCanvasCoords(e);
       if (coords) setRulerEnd(coords);
+      return;
+    }
+
+    if (draggingShapeId) {
+      const coords = getCanvasCoords(e);
+      if (coords) {
+        const shape = shapes.find(s => s.id === draggingShapeId);
+        if (shape) {
+          let newX = coords.x - dragOffset.x;
+          let newY = coords.y - dragOffset.y;
+          // Constrain within vertical build bounds
+          newY = Math.max(level.groundHeight - 180, Math.min(newY, level.groundHeight - 5));
+          onUpdateShape(draggingShapeId, { x: newX, y: newY });
+        }
+      }
     }
   };
 
@@ -277,9 +348,33 @@ export function GameCanvas({
       setRulerStart(null);
       setRulerEnd(null);
     }
+    if (draggingShapeId) {
+      // Recompute grounded state
+      const shape = shapes.find(s => s.id === draggingShapeId);
+      if (shape) {
+        const touchesGround = (shape.y + shape.height) >= level.groundHeight - 5;
+        const touchesShape = shapes.some((s) => {
+          if (s.id === shape.id) return false;
+          const sBottom = s.y + s.height;
+          return Math.abs(shape.y - sBottom) < 10 && shape.x + shape.width > s.x && shape.x < s.x + s.width;
+        });
+        onUpdateShape(draggingShapeId, { grounded: touchesGround || touchesShape });
+      }
+      setDraggingShapeId(null);
+    }
   };
 
   const handleShapeClick = (e: React.MouseEvent, id: string) => {
+    if (simulationState !== "idle") return;
+    // Don't remove if we just dragged it
+    if (draggingShapeId === id) return;
+    e.stopPropagation();
+    // Instead of deleting on simple click which conflicts with drag start,
+    // we use Shift+Click or double click? Let's use Right Click (ContextMenu) to remove
+  };
+
+  const handleContextMenu = (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
     if (simulationState !== "idle") return;
     e.stopPropagation();
     onRemoveShape(id);
@@ -289,6 +384,7 @@ export function GameCanvas({
     circle: "hsl(280, 70%, 60%)",
     rectangle: "hsl(192, 100%, 50%)",
     triangle: "hsl(145, 70%, 50%)",
+    trapezoid: "hsl(35, 90%, 55%)",
   };
 
   // Coverage indicator
@@ -310,7 +406,8 @@ export function GameCanvas({
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
-        style={{ cursor: activeTool === "ruler" ? "crosshair" : (selectedShape && simulationState === "idle" ? "crosshair" : "default") }}
+        onPointerLeave={handlePointerUp}
+        style={{ cursor: activeTool === "ruler" ? "crosshair" : (draggingShapeId ? "grabbing" : (selectedShape && simulationState === "idle" ? "crosshair" : "default")) }}
       >
         <defs>
           <marker id="arrowDown" markerWidth="6" markerHeight="6" refX="3" refY="6" orient="auto">
@@ -431,12 +528,14 @@ export function GameCanvas({
         {shapes.map((shape) => {
           const color = colorMap[shape.type];
           const isHovered = hoveredShapeId === shape.id;
+          const isDragging = draggingShapeId === shape.id;
           return (
             <g key={shape.id}
               onClick={(e) => handleShapeClick(e, shape.id)}
+              onContextMenu={(e) => handleContextMenu(e, shape.id)}
               onMouseEnter={() => onHoverShape(shape.id)}
               onMouseLeave={() => onHoverShape(null)}
-              style={{ cursor: simulationState === "idle" ? "pointer" : "default" }}
+              style={{ cursor: simulationState === "idle" ? (isDragging ? "grabbing" : "grab") : "default" }}
             >
               {/* Shape */}
               {shape.type === "circle" && (
@@ -455,8 +554,14 @@ export function GameCanvas({
                   fill={color} fillOpacity={isHovered ? 0.6 : 0.35} stroke={color}
                   strokeWidth={isHovered ? 3 : 2} filter={isHovered ? "url(#glow)" : undefined} />
               )}
+              {shape.type === "trapezoid" && (
+                <polygon
+                  points={`${shape.x + Math.round(shape.width * 0.25)},${shape.y} ${shape.x + Math.round(shape.width * 0.75)},${shape.y} ${shape.x + shape.width},${shape.y + shape.height} ${shape.x},${shape.y + shape.height}`}
+                  fill={color} fillOpacity={isHovered ? 0.6 : 0.35} stroke={color}
+                  strokeWidth={isHovered ? 3 : 2} filter={isHovered ? "url(#glow)" : undefined} />
+              )}
               {/* Annotations */}
-              {showAnnotations && <ShapeAnnotations shape={shape} isHovered={isHovered} />}
+              {showAnnotations && !isDragging && <ShapeAnnotations shape={shape} isHovered={isHovered} />}
             </g>
           );
         })}

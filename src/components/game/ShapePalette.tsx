@@ -12,6 +12,7 @@ const shapes: { type: ShapeType; label: string; formula: string; colorClass: str
   { type: "circle", label: "Circle", formula: "A = πr²", colorClass: "shape-circle" },
   { type: "rectangle", label: "Rectangle", formula: "A = l × w", colorClass: "shape-rect" },
   { type: "triangle", label: "Triangle", formula: "A = ½bh", colorClass: "shape-triangle" },
+  { type: "trapezoid", label: "Trapezoid", formula: "A = ½(a+b)h", colorClass: "shape-trapezoid" },
 ];
 
 function ShapeIcon({ type, size = 32 }: { type: ShapeType; size?: number }) {
@@ -27,6 +28,9 @@ function ShapeIcon({ type, size = 32 }: { type: ShapeType; size?: number }) {
       {type === "triangle" && (
         <polygon points={`${half},3 ${size - 3},${size - 3} 3,${size - 3}`} fill="currentColor" opacity={0.3} stroke="currentColor" strokeWidth={2} />
       )}
+      {type === "trapezoid" && (
+        <polygon points={`${half - 4},6 ${half + 4},6 ${size - 3},${size - 6} 3,${size - 6}`} fill="currentColor" opacity={0.3} stroke="currentColor" strokeWidth={2} />
+      )}
     </svg>
   );
 }
@@ -37,6 +41,8 @@ export function ShapePalette({ selectedShape, onSelect, shapeSize, onSizeChange 
       ? Math.PI * Math.pow(Math.min(shapeSize.width, shapeSize.height) / 2, 2)
       : selectedShape === "triangle"
       ? (shapeSize.width * shapeSize.height) / 2
+      : selectedShape === "trapezoid"
+      ? (0.75 * shapeSize.width * shapeSize.height)
       : shapeSize.width * shapeSize.height;
 
   return (
@@ -45,16 +51,16 @@ export function ShapePalette({ selectedShape, onSelect, shapeSize, onSizeChange 
         Shape Palette
       </h3>
 
-      <div className="grid grid-cols-3 gap-2 mb-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
         {shapes.map(({ type, label, colorClass }) => (
           <motion.button
             key={type}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => onSelect(type)}
-            className={`flex flex-col items-center gap-1 p-3 rounded-lg border-2 transition-colors ${
+            className={`flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition-colors ${
               selectedShape === type
-                ? `border-current ${colorClass === "shape-circle" ? "text-shape-circle border-shape-circle bg-shape-circle/10" : colorClass === "shape-rect" ? "text-shape-rect border-shape-rect bg-shape-rect/10" : "text-shape-triangle border-shape-triangle bg-shape-triangle/10"}`
+                ? `border-current ${colorClass === "shape-circle" ? "text-shape-circle border-shape-circle bg-shape-circle/10" : colorClass === "shape-rect" ? "text-shape-rect border-shape-rect bg-shape-rect/10" : colorClass === "shape-triangle" ? "text-shape-triangle border-shape-triangle bg-shape-triangle/10" : "text-[hsl(35,90%,55%)] border-[hsl(35,90%,55%)] bg-[hsl(35,90%,55%)]/10"}`
                 : "border-border text-muted-foreground hover:border-muted-foreground"
             }`}
           >

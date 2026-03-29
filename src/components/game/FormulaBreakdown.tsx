@@ -21,10 +21,10 @@ export function FormulaBreakdown({ shape }: FormulaBreakdownProps) {
 
   const areaSteps = getFormulaSteps(shape.type, shape.width, shape.height);
   const perimSteps = getPerimeterSteps(shape.type, shape.width, shape.height);
-  const colorClass = shape.type === "circle" ? "text-shape-circle" : shape.type === "rectangle" ? "text-shape-rect" : shape.type === "triangle" ? "text-shape-triangle" : "text-[hsl(35,90%,55%)]";
+  const colorClass = shape.type === "circle" ? "text-shape-circle" : shape.type === "rectangle" ? "text-shape-rect" : shape.type === "triangle" ? "text-shape-triangle" : shape.type === "parallelogram" ? "text-shape-parallelogram" : shape.type === "hexagon" ? "text-shape-hexagon" : "text-[hsl(35,90%,55%)]";
   const typeLabel = shape.type.charAt(0).toUpperCase() + shape.type.slice(1);
-  const strengthLabel = shape.type === "triangle" ? "VERY HIGH (rigid)" : shape.type === "trapezoid" ? "HIGH (stable base)" : shape.type === "rectangle" ? "MEDIUM" : "LOW (point contact)";
-  const strengthColor = shape.type === "triangle" ? "text-shape-triangle" : shape.type === "trapezoid" ? "text-[hsl(35,90%,55%)]" : shape.type === "rectangle" ? "text-shape-rect" : "text-destructive";
+  const strengthLabel = shape.type === "triangle" ? "VERY HIGH (rigid)" : shape.type === "trapezoid" ? "HIGH (stable base)" : shape.type === "hexagon" ? "HIGH (honeycomb)" : shape.type === "rectangle" || shape.type === "parallelogram" ? "MEDIUM" : "LOW (point contact)";
+  const strengthColor = shape.type === "triangle" ? "text-shape-triangle" : shape.type === "trapezoid" ? "text-[hsl(35,90%,55%)]" : shape.type === "hexagon" ? "text-shape-hexagon" : shape.type === "rectangle" ? "text-shape-rect" : shape.type === "parallelogram" ? "text-shape-parallelogram" : "text-destructive";
 
   return (
     <AnimatePresence mode="wait">
@@ -72,14 +72,16 @@ export function FormulaBreakdown({ shape }: FormulaBreakdownProps) {
             <div className="text-[10px] text-muted-foreground mt-1 leading-relaxed">
               {shape.type === "triangle" && "Awesome! Triangles cannot deform without changing side lengths — inherently rigid!"}
               {shape.type === "trapezoid" && "Great choice! The wide base and angled sides make it very stable for bridging."}
+              {shape.type === "hexagon" && "Honeycombs are mathematically proven to be incredibly strong and efficient builders!"}
               {shape.type === "rectangle" && "Okay, but careful! Rectangles can shear into parallelograms under heavy load."}
+              {shape.type === "parallelogram" && "Interesting angled design, handles tension well but can be wobbly!"}
               {shape.type === "circle" && "Wheee! Circles are fun but only touch at single points — very unstable for bridges!"}
             </div>
             <div className="mt-2 flex items-center gap-2">
               <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                 <div
-                  className={`h-full rounded-full ${shape.type === "triangle" ? "bg-shape-triangle" : shape.type === "trapezoid" ? "bg-[hsl(35,90%,55%)]" : shape.type === "rectangle" ? "bg-shape-rect" : "bg-destructive"}`}
-                  style={{ width: `${shape.type === "triangle" ? 100 : shape.type === "trapezoid" ? 80 : shape.type === "rectangle" ? 55 : 30}%` }}
+                  className={`h-full rounded-full ${shape.type === "triangle" ? "bg-shape-triangle" : shape.type === "trapezoid" ? "bg-[hsl(35,90%,55%)]" : shape.type === "hexagon" ? "bg-shape-hexagon" : shape.type === "rectangle" ? "bg-shape-rect" : shape.type === "parallelogram" ? "bg-shape-parallelogram" : "bg-destructive"}`}
+                  style={{ width: `${shape.type === "triangle" ? 100 : shape.type === "trapezoid" || shape.type === "hexagon" ? 80 : shape.type === "rectangle" || shape.type === "parallelogram" ? 55 : 30}%` }}
                 />
               </div>
               <span className="text-[10px] text-muted-foreground font-mono">

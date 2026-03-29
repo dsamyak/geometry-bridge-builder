@@ -58,6 +58,8 @@ export default {
         "shape-circle": "hsl(var(--shape-circle))",
         "shape-rect": "hsl(var(--shape-rect))",
         "shape-triangle": "hsl(var(--shape-triangle))",
+        "shape-parallelogram": "hsl(12, 90%, 65%)",
+        "shape-hexagon": "hsl(200, 90%, 65%)",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

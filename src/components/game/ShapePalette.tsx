@@ -13,6 +13,8 @@ const shapes: { type: ShapeType; label: string; formula: string; colorClass: str
   { type: "rectangle", label: "Rectangle", formula: "A = l × w", colorClass: "shape-rect" },
   { type: "triangle", label: "Triangle", formula: "A = ½bh", colorClass: "shape-triangle" },
   { type: "trapezoid", label: "Trapezoid", formula: "A = ½(a+b)h", colorClass: "shape-trapezoid" },
+  { type: "parallelogram", label: "Parallelogram", formula: "A = bh", colorClass: "shape-parallelogram" },
+  { type: "hexagon", label: "Hexagon", formula: "A = (3√3/2)s²", colorClass: "shape-hexagon" },
 ];
 
 function ShapeIcon({ type, size = 32 }: { type: ShapeType; size?: number }) {
@@ -31,6 +33,12 @@ function ShapeIcon({ type, size = 32 }: { type: ShapeType; size?: number }) {
       {type === "trapezoid" && (
         <polygon points={`${half - 4},6 ${half + 4},6 ${size - 3},${size - 6} 3,${size - 6}`} fill="currentColor" opacity={0.3} stroke="currentColor" strokeWidth={2} />
       )}
+      {type === "parallelogram" && (
+        <polygon points={`${half + 4},6 ${size - 3},6 ${half - 4},${size - 6} 3,${size - 6}`} fill="currentColor" opacity={0.3} stroke="currentColor" strokeWidth={2} />
+      )}
+      {type === "hexagon" && (
+        <polygon points={`${half},3 ${size - 4},8 ${size - 4},${size - 8} ${half},${size - 3} 4,${size - 8} 4,8`} fill="currentColor" opacity={0.3} stroke="currentColor" strokeWidth={2} />
+      )}
     </svg>
   );
 }
@@ -43,6 +51,8 @@ export function ShapePalette({ selectedShape, onSelect, shapeSize, onSizeChange 
       ? (shapeSize.width * shapeSize.height) / 2
       : selectedShape === "trapezoid"
       ? (0.75 * shapeSize.width * shapeSize.height)
+      : selectedShape === "hexagon"
+      ? ((3 * Math.sqrt(3) / 2) * Math.pow(Math.min(shapeSize.width, shapeSize.height) / 2, 2))
       : shapeSize.width * shapeSize.height;
 
   return (
@@ -60,7 +70,7 @@ export function ShapePalette({ selectedShape, onSelect, shapeSize, onSizeChange 
             onClick={() => onSelect(type)}
             className={`flex flex-col items-center gap-1 p-2 rounded-lg border-2 transition-colors ${
               selectedShape === type
-                ? `border-current ${colorClass === "shape-circle" ? "text-shape-circle border-shape-circle bg-shape-circle/10" : colorClass === "shape-rect" ? "text-shape-rect border-shape-rect bg-shape-rect/10" : colorClass === "shape-triangle" ? "text-shape-triangle border-shape-triangle bg-shape-triangle/10" : "text-[hsl(35,90%,55%)] border-[hsl(35,90%,55%)] bg-[hsl(35,90%,55%)]/10"}`
+                ? `border-current ${colorClass === "shape-circle" ? "text-shape-circle border-shape-circle bg-shape-circle/10" : colorClass === "shape-rect" ? "text-shape-rect border-shape-rect bg-shape-rect/10" : colorClass === "shape-triangle" ? "text-shape-triangle border-shape-triangle bg-shape-triangle/10" : colorClass === "shape-parallelogram" ? "text-shape-parallelogram border-shape-parallelogram bg-shape-parallelogram/10" : colorClass === "shape-hexagon" ? "text-shape-hexagon border-shape-hexagon bg-shape-hexagon/10" : "text-[hsl(35,90%,55%)] border-[hsl(35,90%,55%)] bg-[hsl(35,90%,55%)]/10"}`
                 : "border-border text-muted-foreground hover:border-muted-foreground"
             }`}
           >
@@ -86,7 +96,7 @@ export function ShapePalette({ selectedShape, onSelect, shapeSize, onSizeChange 
           <div className="space-y-2">
             <label className="flex justify-between text-xs">
               <span className="text-muted-foreground">
-                {selectedShape === "circle" ? "Diameter" : "Width"}
+                {selectedShape === "circle" ? "Diameter" : selectedShape === "hexagon" ? "Size (Bounding)" : "Width"}
               </span>
               <span className="text-foreground">{shapeSize.width}px</span>
             </label>
@@ -100,7 +110,7 @@ export function ShapePalette({ selectedShape, onSelect, shapeSize, onSizeChange 
             />
           </div>
 
-          {selectedShape !== "circle" && (
+          {(selectedShape !== "circle" && selectedShape !== "hexagon") && (
             <div className="space-y-2">
               <label className="flex justify-between text-xs">
                 <span className="text-muted-foreground">Height</span>

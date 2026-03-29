@@ -1,4 +1,4 @@
-export type ShapeType = 'circle' | 'rectangle' | 'triangle' | 'trapezoid';
+export type ShapeType = 'circle' | 'rectangle' | 'triangle' | 'trapezoid' | 'parallelogram' | 'hexagon';
 
 export interface PlacedShape {
   id: string;
@@ -75,6 +75,13 @@ export function calculateArea(type: ShapeType, width: number, height: number): n
     case 'trapezoid':
       // Isosceles trapezoid with top base = 0.5 * bottom base (width)
       return (0.75 * width * height);
+    case 'parallelogram':
+      return width * height;
+    case 'hexagon':
+      // Regular hexagon inscribed in a circle of diameter min(width, height)
+      // Side length `s` = radius = min(width, height) / 2
+      const s = Math.min(width, height) / 2;
+      return (3 * Math.sqrt(3) / 2) * s * s;
   }
 }
 
@@ -94,6 +101,15 @@ export function calculatePerimeter(type: ShapeType, width: number, height: numbe
       const side = Math.sqrt(height * height + Math.pow(width * 0.25, 2));
       return 1.5 * width + 2 * side;
     }
+    case 'parallelogram': {
+      // Assuming a standard skew (width/4 shift)
+      const side = Math.sqrt(height * height + Math.pow(width * 0.25, 2));
+      return 2 * (width + side);
+    }
+    case 'hexagon': {
+      const s = Math.min(width, height) / 2;
+      return 6 * s;
+    }
   }
 }
 
@@ -109,6 +125,10 @@ export function calculateSupportStrength(type: ShapeType, width: number, height:
       return area * 1.2;
     case 'trapezoid':
       return area * 1.8; // Better than rectangle
+    case 'parallelogram':
+      return area * 1.2; // Similar to rectangle
+    case 'hexagon':
+      return area * 1.5; // Good honeycomb structure properties
     case 'circle':
       return area * 0.8;
   }
@@ -148,6 +168,23 @@ export function getFormulaSteps(type: ShapeType, width: number, height: number):
         explanation: `Top = ${Math.round(width/2)}, Bottom = ${width}, Height = ${height}`,
       };
     }
+    case 'parallelogram': {
+      return {
+        formula: 'A = b × h',
+        substitution: `A = ${width} × ${height}`,
+        result: `A = ${(width * height).toFixed(1)} sq units`,
+        explanation: `Base = ${width}, Height = ${height}`,
+      };
+    }
+    case 'hexagon': {
+      const s = Math.min(width, height) / 2;
+      return {
+        formula: 'A = (3√3)/2 × s²',
+        substitution: `A = (3√3)/2 × ${s.toFixed(1)}²`,
+        result: `A = ${((3 * Math.sqrt(3) / 2) * s * s).toFixed(1)} sq units`,
+        explanation: `Side (s) = ${s.toFixed(1)}`,
+      };
+    }
   }
 }
 
@@ -182,6 +219,22 @@ export function getPerimeterSteps(type: ShapeType, width: number, height: number
         formula: 'P = a + b + 2s',
         substitution: `P = ${Math.round(width/2)} + ${width} + 2 × ${side.toFixed(1)}`,
         result: `P = ${(1.5 * width + 2 * side).toFixed(1)} units`,
+      };
+    }
+    case 'parallelogram': {
+      const side = Math.sqrt(height * height + Math.pow(width * 0.25, 2));
+      return {
+        formula: 'P = 2(b + s)',
+        substitution: `P = 2(${width} + ${side.toFixed(1)})`,
+        result: `P = ${(2 * (width + side)).toFixed(1)} units`,
+      };
+    }
+    case 'hexagon': {
+      const s = Math.min(width, height) / 2;
+      return {
+        formula: 'P = 6s',
+        substitution: `P = 6 × ${s.toFixed(1)}`,
+        result: `P = ${(6 * s).toFixed(1)} units`,
       };
     }
   }

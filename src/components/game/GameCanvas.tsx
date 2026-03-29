@@ -166,6 +166,30 @@ function ShapeAnnotations({ shape, isHovered }: { shape: PlacedShape; isHovered:
     );
   }
 
+  if (shape.type === "parallelogram") {
+    return (
+      <g>
+        {isHovered && (
+          <text x={shape.x + shape.width / 2} y={shape.y + shape.height / 2 + 4} textAnchor="middle" fill={labelColor} fontSize={fontSize + 1} fontFamily="JetBrains Mono" fontWeight="bold">
+            A = {shape.area.toFixed(0)}
+          </text>
+        )}
+      </g>
+    );
+  }
+
+  if (shape.type === "hexagon") {
+    return (
+      <g>
+        {isHovered && (
+          <text x={shape.x + shape.width / 2} y={shape.y + shape.height / 2 + 4} textAnchor="middle" fill={labelColor} fontSize={fontSize + 1} fontFamily="JetBrains Mono" fontWeight="bold">
+            A = {shape.area.toFixed(0)}
+          </text>
+        )}
+      </g>
+    );
+  }
+
   return null;
 }
 
@@ -380,11 +404,19 @@ export function GameCanvas({
     onRemoveShape(id);
   };
 
+  const handleDoubleClickShape = (e: React.MouseEvent, id: string, currentRotation: number) => {
+    e.stopPropagation();
+    if (simulationState !== "idle") return;
+    onUpdateShape(id, { rotation: (currentRotation + 45) % 360 });
+  };
+
   const colorMap: Record<ShapeType, string> = {
     circle: "hsl(280, 70%, 60%)",
     rectangle: "hsl(192, 100%, 50%)",
     triangle: "hsl(145, 70%, 50%)",
     trapezoid: "hsl(35, 90%, 55%)",
+    parallelogram: "hsl(12, 90%, 65%)",
+    hexagon: "hsl(200, 90%, 65%)",
   };
 
   // Coverage indicator
@@ -532,10 +564,12 @@ export function GameCanvas({
           return (
             <g key={shape.id}
               onClick={(e) => handleShapeClick(e, shape.id)}
+              onDoubleClick={(e) => handleDoubleClickShape(e, shape.id, shape.rotation || 0)}
               onContextMenu={(e) => handleContextMenu(e, shape.id)}
               onMouseEnter={() => onHoverShape(shape.id)}
               onMouseLeave={() => onHoverShape(null)}
               style={{ cursor: simulationState === "idle" ? (isDragging ? "grabbing" : "grab") : "default" }}
+              transform={`rotate(${shape.rotation || 0} ${shape.x + shape.width / 2} ${shape.y + shape.height / 2})`}
             >
               {/* Shape */}
               {shape.type === "circle" && (
@@ -557,6 +591,18 @@ export function GameCanvas({
               {shape.type === "trapezoid" && (
                 <polygon
                   points={`${shape.x + Math.round(shape.width * 0.25)},${shape.y} ${shape.x + Math.round(shape.width * 0.75)},${shape.y} ${shape.x + shape.width},${shape.y + shape.height} ${shape.x},${shape.y + shape.height}`}
+                  fill={color} fillOpacity={isHovered ? 0.6 : 0.35} stroke={color}
+                  strokeWidth={isHovered ? 3 : 2} filter={isHovered ? "url(#glow)" : undefined} />
+              )}
+              {shape.type === "parallelogram" && (
+                <polygon
+                  points={`${shape.x + Math.round(shape.width * 0.25)},${shape.y} ${shape.x + shape.width},${shape.y} ${shape.x + Math.round(shape.width * 0.75)},${shape.y + shape.height} ${shape.x},${shape.y + shape.height}`}
+                  fill={color} fillOpacity={isHovered ? 0.6 : 0.35} stroke={color}
+                  strokeWidth={isHovered ? 3 : 2} filter={isHovered ? "url(#glow)" : undefined} />
+              )}
+              {shape.type === "hexagon" && (
+                <polygon
+                  points={`${shape.x + shape.width / 2},${shape.y} ${shape.x + shape.width},${shape.y + shape.height * 0.25} ${shape.x + shape.width},${shape.y + shape.height * 0.75} ${shape.x + shape.width / 2},${shape.y + shape.height} ${shape.x},${shape.y + shape.height * 0.75} ${shape.x},${shape.y + shape.height * 0.25}`}
                   fill={color} fillOpacity={isHovered ? 0.6 : 0.35} stroke={color}
                   strokeWidth={isHovered ? 3 : 2} filter={isHovered ? "url(#glow)" : undefined} />
               )}

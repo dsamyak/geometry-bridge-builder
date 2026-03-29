@@ -1,0 +1,190 @@
+<svg viewBox="-40 -40 592 592" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient (Black Theme) -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#000000" />
+      <stop offset="50%" stop-color="#0a0a0a" />
+      <stop offset="100%" stop-color="#171717" />
+    </linearGradient>
+
+    <!-- Base Platform Gradient -->
+    <linearGradient id="platformGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#4c1d95" />
+    </linearGradient>
+
+    <!-- Base Edge Gradient -->
+    <linearGradient id="platformEdge" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#7c3aed" />
+      <stop offset="100%" stop-color="#2e1065" />
+    </linearGradient>
+
+    <!-- Bridge Gradient -->
+    <linearGradient id="bridgeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06b6d4" />
+      <stop offset="50%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#0ea5e9" />
+    </linearGradient>
+
+    <!-- Glowing Lines Gradient -->
+    <linearGradient id="glowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2dd4bf" />
+      <stop offset="100%" stop-color="#3b82f6" />
+    </linearGradient>
+
+    <!-- Hexagon Border Gradient -->
+    <linearGradient id="hexBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="50%" stop-color="#a855f7" />
+      <stop offset="100%" stop-color="#ec4899" />
+    </linearGradient>
+
+    <!-- Medium Glow Filter for nodes -->
+    <filter id="glowMed" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Subtle Glow Filter for small details -->
+    <filter id="glowSubtle" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Drop Shadow Filter for outer blocks -->
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-opacity="0.6" flood-color="#000000"/>
+    </filter>
+  </defs>
+
+  <!-- BACKGROUND: Rounded Squircle Shield -->
+  <rect x="24" y="24" width="464" height="464" rx="100" fill="url(#bgGrad)" filter="url(#shadow)" />
+  
+  <!-- Outer glowing border -->
+  <rect x="24" y="24" width="464" height="464" rx="100" fill="none" stroke="url(#hexBorder)" stroke-width="4" filter="url(#glowSubtle)" />
+  
+  <!-- Inner Border for depth -->
+  <rect x="36" y="36" width="440" height="440" rx="88" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="2" />
+
+  <!-- Background Architecture Pattern (Blueprint lines) -->
+  <g opacity="0.15" stroke="#94a3b8" stroke-width="1.5">
+    <line x1="24" y1="128" x2="488" y2="128" />
+    <line x1="24" y1="256" x2="488" y2="256" />
+    <line x1="24" y1="384" x2="488" y2="384" />
+    <line x1="128" y1="24" x2="128" y2="488" />
+    <line x1="256" y1="24" x2="256" y2="488" />
+    <line x1="384" y1="24" x2="384" y2="488" />
+    <circle cx="256" cy="256" r="140" fill="none" stroke-dasharray="10 10" />
+    <circle cx="256" cy="256" r="200" fill="none" stroke-dasharray="2 6" />
+    <path d="M 116 256 A 140 140 0 0 1 396 256" fill="none" stroke-width="2" />
+  </g>
+
+  <!-- Abyss/Canyon Base -->
+  <path d="M160 500 L200 320 L312 320 L352 500 Z" fill="#020617" opacity="0.6" />
+
+  <!-- The Pillars (Left and Right) -->
+  <!-- Left Pillar Side -->
+  <path d="M48 320 L180 320 L180 480 Q180 488 172 488 L48 488 Z" fill="url(#platformEdge)" />
+  <!-- Right Pillar Side -->
+  <path d="M332 320 L464 320 L464 488 L340 488 Q332 488 332 480 Z" fill="url(#platformEdge)" />
+  
+  <!-- Left Pillar Top -->
+  <path d="M48 280 L180 280 L180 320 L48 320 Z" fill="url(#platformGrad)" filter="url(#shadow)" />
+  <path d="M48 280 L180 280 L180 290 L48 290 Z" fill="rgba(255,255,255,0.2)" /> <!-- Top highlight -->
+  
+  <!-- Right Pillar Top -->
+  <path d="M332 280 L464 280 L464 320 L332 320 Z" fill="url(#platformGrad)" filter="url(#shadow)" />
+  <path d="M332 280 L464 280 L464 290 L332 290 Z" fill="rgba(255,255,255,0.2)" /> <!-- Top highlight -->
+
+  <!-- Bridge spanning the gap -->
+  <!-- Main deck -->
+  <rect x="160" y="272" width="192" height="16" rx="4" fill="url(#bridgeGrad)" filter="url(#shadow)" />
+  <!-- Deck highlight -->
+  <rect x="160" y="272" width="192" height="4" rx="2" fill="rgba(255,255,255,0.4)" />
+
+  <!-- Truss Path Layer (glow & main) -->
+  <g stroke="url(#glowGrad)" stroke-width="10" stroke-linejoin="round" stroke-linecap="round" fill="none" filter="url(#shadow)">
+    <!-- Top chord -->
+    <line x1="200" y1="180" x2="312" y2="180" />
+    <!-- Diagonals & Verticals -->
+    <line x1="176" y1="272" x2="200" y2="180" />
+    <line x1="200" y1="180" x2="232" y2="272" />
+    <line x1="232" y1="272" x2="256" y2="180" />
+    <line x1="256" y1="180" x2="280" y2="272" />
+    <line x1="280" y1="272" x2="312" y2="180" />
+    <line x1="312" y1="180" x2="336" y2="272" />
+  </g>
+  
+  <!-- Overlaid neon lines for truss structure -->
+  <g stroke="#ffffff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" fill="none" filter="url(#glowSubtle)">
+    <line x1="200" y1="180" x2="312" y2="180" />
+    <line x1="176" y1="272" x2="200" y2="180" />
+    <line x1="200" y1="180" x2="232" y2="272" />
+    <line x1="232" y1="272" x2="256" y2="180" />
+    <line x1="256" y1="180" x2="280" y2="272" />
+    <line x1="280" y1="272" x2="312" y2="180" />
+    <line x1="312" y1="180" x2="336" y2="272" />
+  </g>
+
+  <!-- Abstract Geometry Shapes Floating -->
+  <g filter="url(#shadow)">
+    <!-- Cyan Polygon (Rhombus/Square) at top left -->
+    <path d="M120 100 L150 130 L120 160 L90 130 Z" fill="#06b6d4" />
+    <path d="M120 100 L150 130 L120 130 Z" fill="#67e8f9" opacity="0.6" />
+    
+    <!-- Pink Polygon (Triangle) at top right -->
+    <polygon points="410,120 440,170 380,170" fill="#ec4899" />
+    <polygon points="410,120 440,170 410,170" fill="#fbcfe8" opacity="0.4" />
+
+    <!-- Yellow Hexagon floating mid left -->
+    <path d="M60 210 L75 200 L90 210 L90 230 L75 240 L60 230 Z" fill="#f59e0b" />
+    <path d="M75 200 L90 210 L90 230 L75 215 Z" fill="#fde68a" opacity="0.5" />
+  </g>
+
+  <!-- Glowing Connection Nodes -->
+  <g fill="#c084fc" filter="url(#glowMed)">
+    <!-- Base connections -->
+    <circle cx="176" cy="272" r="6" />
+    <circle cx="232" cy="272" r="6" />
+    <circle cx="280" cy="272" r="6" />
+    <circle cx="336" cy="272" r="6" />
+    <!-- Top connections -->
+    <circle cx="200" cy="180" r="6" fill="#67e8f9" />
+    <circle cx="256" cy="180" r="6" fill="#67e8f9" />
+    <circle cx="312" cy="180" r="6" fill="#67e8f9" />
+  </g>
+  <!-- Node Centers (White) -->
+  <g fill="#ffffff">
+    <circle cx="176" cy="272" r="2.5" />
+    <circle cx="232" cy="272" r="2.5" />
+    <circle cx="280" cy="272" r="2.5" />
+    <circle cx="336" cy="272" r="2.5" />
+    <circle cx="200" cy="180" r="2.5" />
+    <circle cx="256" cy="180" r="2.5" />
+    <circle cx="312" cy="180" r="2.5" />
+  </g>
+
+  <!-- High-tech laser measurement indicators -->
+  <g opacity="0.6">
+    <line x1="200" y1="170" x2="200" y2="130" stroke="#fb7185" stroke-width="2" stroke-dasharray="4" />
+    <line x1="312" y1="170" x2="312" y2="130" stroke="#fb7185" stroke-width="2" stroke-dasharray="4" />
+    <line x1="190" y1="140" x2="322" y2="140" stroke="#fb7185" stroke-width="2" />
+    <polygon points="190,140 196,136 196,144" fill="#fb7185" />
+    <polygon points="322,140 316,136 316,144" fill="#fb7185" />
+    <!-- Small tech text (abstract lines standing in for text) -->
+    <line x1="240" y1="126" x2="272" y2="126" stroke="#fb7185" stroke-width="3" />
+  </g>
+
+  <!-- Star/Sparkle decorations -->
+  <g fill="#ffffff" filter="url(#glowSubtle)">
+    <path d="M 120 60 Q 120 70 110 70 Q 120 70 120 80 Q 120 70 130 70 Q 120 70 120 60 Z" />
+    <path d="M 380 40 Q 380 50 370 50 Q 380 50 380 60 Q 380 50 390 50 Q 380 50 380 40 Z" transform="scale(0.7) translate(160, -20)" />
+    <path d="M 80 340 Q 80 345 75 345 Q 80 345 80 350 Q 80 345 85 345 Q 80 345 80 340 Z" />
+  </g>
+</svg>
